@@ -32,28 +32,35 @@ def handle_rate_limit(func, *args, **kwargs):
 
 def run_command(comment, search_term):
     try:
-        req = requests.get(BASE_URL+search_term)
+        url = BASE_URL + search_term
+        url = url.replace(' ', '&')
+        req = requests.get(url)
         req.raise_for_status()
     except requests.HTTPError:
         print('HTTP Error occured')
+        return
     soup = bs4.BeautifulSoup(req.content)
     if soup.select('.suggestion'):
         return
     else:
+        comment_body = ''
         a_tag = soup.select('.toppush1 .mobile-2 span a')[0]
         name = a_tag.getText()
         link = a_tag.get('href')
-        comment_body = '{:s} : {:s}'.format(name, link)
+        if name.lower() != search_term.lower():
+            comment_body += "'{:s}' not found, did you mean {:s}?\n".format(search_term, name)
+        name = search_term
+        comment_body += 'Panjury link for {:s}: \n{:s}'.format(name, link)
         comment.reply(comment_body)
-        print('Name: {:s} Link: {:s}'.format(name, link))
+        print('Name: {:s}\tLink: {:s}'.format(name, link))
 
 
 def check_for_command(comment):
     search = re.search(r'^panjurybot\s+', comment.body.strip(), re.IGNORECASE)
     if search:
         command = comment.body.strip()[len(search.group(0)):]
-        kword_1 = re.search(r'^what\s+is\s+(\w+)', command)
-        kword_2 = re.search(r'^tell\s+me\s+about\s+(\w+)', command)
+        kword_1 = re.search(r'^what\s+is\s+(\w+.+)', command)
+        kword_2 = re.search(r'^tell\s+me\s+about\s+(\w+.+)', command)
         if kword_1:
             search_term = kword_1.group(1)
         elif kword_2:
@@ -65,9 +72,12 @@ def check_for_command(comment):
 
 def main():
     r = get_praw()
-    c_stream = praw.helpers.comment_stream(r, SUBREDDIT, limit=100)
+    c_stream = praw.helpers.comment_stream(r, SUBREDDIT, limit=100, verbosity=0)
     for comment in c_stream:
         check_for_command(comment)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('\nStopped by Keyboard interrupt')

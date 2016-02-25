@@ -1,4 +1,6 @@
-config = open('secret.txt', 'rt').read().splitlines()
+config_file = open('assets/secret.txt', 'rt')
+config = config_file.read().splitlines()
+config_file.close()
 
 REDDIT_USER = config[0]
 REDDIT_PASS = config[1]
@@ -11,6 +13,4 @@ USER_AGENT = "macosx:panjury_test_app:0.0.1 (by /u/Arthelon)"
 SUBREDDIT = "pythonforengineers"
 AUTH_TOKENS = ['read', 'submit']
 
-BASE_URL = 'https://www.panjury.com/search/index/keyword/'
-
-config.close()
+BASE_URL = 'http://www.panjury.com/search/index/keyword/'
