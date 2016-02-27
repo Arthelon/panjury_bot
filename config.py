@@ -13,4 +13,4 @@ USER_AGENT = "macosx:panjury_test_app:0.0.1 (by /u/Arthelon)"
 SUBREDDIT = "pythonforengineers"
 AUTH_TOKENS = ['read', 'submit']
 
-BASE_URL = 'http://www.panjury.com/search/index/keyword/'
+BASE_URL = 'https://www.panjury.com/search/index/keyword/'

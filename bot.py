@@ -1,8 +1,27 @@
 import praw
 from config import *
 
-import re, time, requests
+import re, time, requests, os
 import bs4
+from peewee import *
+
+
+db_proxy = Proxy()
+
+
+class BlacklistUser(Model):
+    name = CharField()
+
+    class Meta:
+        database = db_proxy
+
+
+def create_tables():
+    if os.getenv('HEROKU'):
+        database = PostgresqlDatabase('samplepg.db') # add psycopg2 auth
+    else:
+        database = SqliteDatabase('blacklist.db')
+    db_proxy.initialize(database)
 
 
 def get_access_token():
@@ -78,6 +97,7 @@ def main():
 
 if __name__ == '__main__':
     try:
+        create_tables()
         main()
     except KeyboardInterrupt:
         print('\nStopped by Keyboard interrupt')
